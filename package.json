@@ -1,0 +1,16 @@
+{
+  "name": "project-camp-backend",
+  "version": "1.0.0",
+  "description": "Project Camp lets teams organize projects, break down work into tasks & subtasks, attach files, write notes, and collaborate securely with proper role-based access control.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "project camp",
+    "gopuadks"
+  ],
+  "author": "gopuadks",
+  "license": "ISC",
+  "type": "module"
+}
