@@ -7,9 +7,6 @@ export enum UserRoles {
   MEMBER = "member",
 }
 
-/**
- * These are the available roles in a iterable format
- */
 export const avilableRoles = Object.values(UserRoles);
 
 /**
@@ -22,7 +19,4 @@ export enum TaskStaus {
   DONE = "done",
 }
 
-/**
- * These are the available task status in a iterable format
- */
 export const avilableTaskStatus = Object.values(TaskStaus);
