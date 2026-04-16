@@ -7,6 +7,7 @@ import {
   sendEmail,
 } from "../utils/mail.js";
 import { siteUrl } from "../utils/constants.js";
+import type { CookieOptions } from "express";
 
 // Generate access and refresh tokens
 const generateAccessAndRefreshTokens = (user: IUser) => {
@@ -24,9 +25,14 @@ const generateAccessAndRefreshTokens = (user: IUser) => {
   }
 };
 
+const cookiesOptions: CookieOptions = {
+  httpOnly: true,
+  secure: true,
+};
+
 // Register new user
 export const registerUser = asyncHandler(async (req, res) => {
-  const { username, email, password, role } = req.body;
+  const { username, email, password } = req.body;
 
   const existingUser = await User.findOne({
     $or: [{ username }, { email }],
@@ -60,7 +66,7 @@ export const registerUser = asyncHandler(async (req, res) => {
   await sendEmail(content, newUser.email, "Verify your email");
 
   const user = await User.findById(newUser._id).select(
-    "-password -refreshToken -accessToken -emailVerificationToken -emailVerificationExpires",
+    "-password -refreshToken -emailVerificationToken -emailVerificationExpires",
   );
 
   return res
@@ -68,6 +74,38 @@ export const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, "User created", { user }));
 });
 
-const loginUser = asyncHandler(async (req, res) => {});
+export const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-const verifyEmail = asyncHandler(async (req, res) => {});
+  const user = await User.findOne({ email });
+
+  if (!user) throw new ApiError(400, "User not found");
+
+  const isPasswordValid = await user.isPasswordValid(password);
+
+  if (!isPasswordValid)
+    throw new ApiError(400, "Invalid email or password.");
+
+  const { accessToken, refreshToken } =
+    generateAccessAndRefreshTokens(user);
+
+  await user.save();
+
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -accessToken -refreshToken -emailVerificationToken -emailVerificationExpires",
+  );
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookiesOptions)
+    .cookie("refreshToken", refreshToken, cookiesOptions)
+    .json(
+      new ApiResponse(200, "User logged in successfully", {
+        user: loggedInUser,
+        accessToken,
+        refreshToken,
+      }),
+    );
+});
+
+export const verifyEmail = asyncHandler(async (req, res) => {});

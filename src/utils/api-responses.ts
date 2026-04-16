@@ -5,6 +5,7 @@ export class ApiError extends Error {
   success = false;
   data: unknown;
   error?: unknown;
+  override message: string;
 
   constructor(
     status: number,

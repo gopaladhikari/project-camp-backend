@@ -1,23 +1,21 @@
 import { validationResult } from "express-validator";
 import { ApiError } from "../utils/api-responses.js";
-import type { Request, Response, NextFunction } from "express";
+import { asyncHandler } from "../utils/async-handler.js";
 
-export const validateRequest = (
-  req: Request,
-  _res: Response,
-  next: NextFunction,
-) => {
-  const errors = validationResult(req);
+export const validateRequest = asyncHandler(
+  async (req, _res, next) => {
+    const errors = validationResult(req);
 
-  if (errors.isEmpty()) return next();
+    if (errors.isEmpty()) return next();
 
-  const err: Record<string, string>[] = [];
+    const err: Record<string, string>[] = [];
 
-  errors.array().forEach((error) => {
-    err.push({
-      [error.type]: error.msg,
+    errors.array().forEach((error) => {
+      err.push({
+        [error.type]: error.msg,
+      });
     });
-  });
 
-  throw new ApiError(422, "Validation failed", err);
-};
+    throw new ApiError(422, "Validation failed", err);
+  },
+);
