@@ -4,12 +4,12 @@ export class ApiError extends Error {
   status: number;
   success = false;
   data: unknown;
-  error?: string | string[];
+  error?: unknown;
 
   constructor(
     status: number,
     message: string,
-    error?: string,
+    error?: unknown,
     stack = "",
   ) {
     super(message);
