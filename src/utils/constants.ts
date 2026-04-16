@@ -20,3 +20,7 @@ export enum TaskStaus {
 }
 
 export const avilableTaskStatus = Object.values(TaskStaus);
+
+// Frotend name
+
+export const siteUrl = "http://localhost:3000";

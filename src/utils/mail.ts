@@ -70,6 +70,7 @@ export const sendEmail = async (
   const transport = nodemailer.createTransport({
     host,
     port: parseInt(port),
+    secure: false,
     auth: {
       user,
       pass,
@@ -77,13 +78,14 @@ export const sendEmail = async (
   });
 
   try {
-    await transport.sendMail({
-      from: "Camp Project <projectcamp@projectcamp.com>",
+    const result = await transport.sendMail({
+      from: "projectcamp@projectcamp.com",
       to: email,
       subject: subject,
       text: emailtextual,
       html: emailHTML,
     });
+    console.log("Email sent id:", result.messageId);
   } catch (error) {
     console.error("Error sending email:", error);
   }

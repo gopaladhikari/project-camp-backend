@@ -2,13 +2,15 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import jwt, { type SignOptions } from "jsonwebtoken";
+import type { IUser } from "../types/user.types.js";
 
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET as string;
-const accessTokenExpiry = process.env.ACCESS_TOKEN_EXPIRY;
+const accessTokenExpiry = process.env
+  .ACCESS_TOKEN_EXPIRY as SignOptions["expiresIn"];
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string;
 const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRY;
 
-const userSchema = new Schema(
+const userSchema = new Schema<IUser>(
   {
     avatar: {
       type: String,
@@ -33,7 +35,6 @@ const userSchema = new Schema(
 
     fullName: {
       type: String,
-      required: true,
     },
 
     password: {
@@ -74,7 +75,7 @@ const userSchema = new Schema(
   },
 );
 
-userSchema.pre("save", async function () {
+userSchema.pre("save", async function (next) {
   if (this.password && this.isModified("password"))
     this.password = await bcrypt.hash(this.password, 10);
 });
@@ -121,7 +122,7 @@ userSchema.methods.generateToken = function () {
     .update(unhashedToken)
     .digest("hex");
 
-  const tokenExpiry = Date.now() + 20 * 60 * 1000;
+  const tokenExpiry = Date.now() + 20 * 60 * 1000; // 20 minutes
 
   return {
     unhashedToken,

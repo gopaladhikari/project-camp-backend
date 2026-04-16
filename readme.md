@@ -50,7 +50,7 @@ Project Camp lets teams organize projects, break down work into tasks & subtasks
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/yourusername/project-camp-backend.git
+git clone https://github.com/gopaladhikari/project-camp-backend
 cd project-camp-backend
 
 # 2. Install dependencies
