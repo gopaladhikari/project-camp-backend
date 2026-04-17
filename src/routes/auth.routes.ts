@@ -4,6 +4,8 @@ import {
   loginUser,
   verifyEmail,
   logoutUser,
+  getCurrentUser,
+  resendEmailVerification,
 } from "../controllers/auth.controller.js";
 import { validateRequest } from "../middlewares/validator.middleware.js";
 import {
@@ -24,6 +26,14 @@ authRouter
 
 authRouter.route("/logout").post(verifyJwt, logoutUser);
 
-authRouter.route("/verify-email").post(verifyEmail);
+authRouter.route("/current-user").get(verifyJwt, getCurrentUser);
+
+authRouter
+  .route("/verify-email/:verificationToken")
+  .post(verifyEmail);
+
+authRouter
+  .route("/resend-email-verification")
+  .post(resendEmailVerification);
 
 export { authRouter };

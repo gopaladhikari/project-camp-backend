@@ -21,7 +21,9 @@ export const verifyJwt = asyncHandler(async (req, _res, next) => {
   if (!decoded)
     throw new ApiError(401, "Unauthorized", "Invalid token");
 
-  const user = await User.findById(decoded._id);
+  const user = await User.findById(decoded._id).select(
+    "-password -emailVerificationToken -emailVerificationExpires",
+  );
 
   if (!user) throw new ApiError(401, "Unauthorized", "Invalid token");
 
