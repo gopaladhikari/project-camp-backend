@@ -6,6 +6,7 @@ import {
   logoutUser,
   getCurrentUser,
   resendEmailVerification,
+  refreshAccessToken,
 } from "../controllers/auth.controller.js";
 import { validateRequest } from "../middlewares/validator.middleware.js";
 import {
@@ -35,5 +36,9 @@ authRouter
 authRouter
   .route("/resend-email-verification")
   .post(resendEmailVerification);
+
+authRouter
+  .route("/refresh-token")
+  .post(verifyJwt, refreshAccessToken);
 
 export { authRouter };
