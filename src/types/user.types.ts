@@ -19,6 +19,6 @@ export type IUser = {
   accessToken: string;
   forgotPasswordToken: string;
   fogotPasswordExpires: Date;
-  emailVerificationToken?: string;
-  emailVerificationExpires?: Date;
+  emailVerificationToken?: string | undefined;
+  emailVerificationExpires?: Date | undefined;
 } & Document;

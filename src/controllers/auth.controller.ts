@@ -161,6 +161,9 @@ export const verifyEmail = asyncHandler(async (req, res) => {
 
   user.isEmailVerified = true;
 
+  user.emailVerificationToken = undefined;
+  user.emailVerificationExpires = undefined;
+
   await user.save();
 
   return res
@@ -211,7 +214,9 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     process.env.REFRESH_TOKEN_SECRET as string,
   ) as jwt.JwtPayload;
 
-  const user = await User.findById(decodedToken._id);
+  const user = await User.findById(decodedToken._id).select(
+    "-password -emailVerificationToken -emailVerificationExpires",
+  );
 
   if (!user) throw new ApiError(400, "Invalid token");
 
@@ -227,10 +232,5 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     .status(200)
     .cookie("accessToken", accessToken, cookiesOptions)
     .cookie("refreshToken", newRefreshToken, cookiesOptions)
-    .json(
-      new ApiResponse(200, "Access token refreshed", {
-        accessToken,
-        refreshToken: newRefreshToken,
-      }),
-    );
+    .json(new ApiResponse(200, "Access token refreshed", { user }));
 });
