@@ -17,8 +17,8 @@ export type IUser = {
   isEmailVerified: boolean;
   refreshToken: string;
   accessToken: string;
-  forgotPasswordToken: string;
-  fogotPasswordExpires: Date;
-  emailVerificationToken?: string | undefined;
-  emailVerificationExpires?: Date | undefined;
+  forgotPasswordToken: string | undefined;
+  fogotPasswordExpires: Date | undefined;
+  emailVerificationToken: string | undefined;
+  emailVerificationExpires: Date | undefined;
 } & Document;

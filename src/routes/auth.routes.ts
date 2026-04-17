@@ -7,9 +7,15 @@ import {
   getCurrentUser,
   resendEmailVerification,
   refreshAccessToken,
+  forgotPassword,
+  resetPassword,
+  changeCurrentPassword,
 } from "../controllers/auth.controller.js";
 import { validateRequest } from "../middlewares/validator.middleware.js";
 import {
+  changePasswordValidator,
+  forgotPasswordValidator,
+  resetPasswordValidator,
   userLoginValidator,
   userRegisterValidator,
 } from "../validators/auth.validator.js";
@@ -40,5 +46,22 @@ authRouter
 authRouter
   .route("/refresh-token")
   .post(verifyJwt, refreshAccessToken);
+
+authRouter
+  .route("/forgot-password")
+  .post(forgotPasswordValidator(), validateRequest, forgotPassword);
+
+authRouter
+  .route("/reset-password/:resetToken")
+  .post(resetPasswordValidator(), validateRequest, resetPassword);
+
+authRouter
+  .route("/change-password")
+  .post(
+    changePasswordValidator(),
+    validateRequest,
+    verifyJwt,
+    changeCurrentPassword,
+  );
 
 export { authRouter };
