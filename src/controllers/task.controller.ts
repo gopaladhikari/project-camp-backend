@@ -153,7 +153,62 @@ export const getTaskById = asyncHandler(async (req, res) => {
 });
 
 // Update task details by task id and project id
-export const updateTaskById = asyncHandler(async (req, res) => {});
+export const updateTaskById = asyncHandler(async (req, res) => {
+  const projectId = req.params.projectId as string;
+  const taskId = req.params.taskId as string;
+
+  if (!isValidObjectId(projectId))
+    throw new ApiError(400, "Invalid project id");
+
+  if (!isValidObjectId(taskId))
+    throw new ApiError(400, "Invalid task id");
+
+  const { title, description, status, assignedTo } = req.body;
+
+  const task = await Task.findOneAndUpdate(
+    {
+      _id: taskId,
+      project: projectId,
+    },
+    {
+      title,
+      description,
+      status,
+      assignedTo: new mongoose.Types.ObjectId(assignedTo),
+    },
+    {
+      new: true,
+    },
+  );
+
+  if (!task) throw new ApiError(400, "Task update failed");
+
+  return res.status(200).json(
+    new ApiResponse(200, "Task updated", {
+      task,
+    }),
+  );
+});
 
 // Delete task by task id and project id
-export const deleteTaskById = asyncHandler(async (req, res) => {});
+export const deleteTaskById = asyncHandler(async (req, res) => {
+  const projectId = req.params.projectId as string;
+  const taskId = req.params.taskId as string;
+
+  if (!isValidObjectId(projectId))
+    throw new ApiError(400, "Invalid project id");
+
+  if (!isValidObjectId(taskId))
+    throw new ApiError(400, "Invalid task id");
+
+  const task = await Task.findOneAndDelete({
+    _id: taskId,
+    project: projectId,
+  });
+
+  if (!task) throw new ApiError(400, "Task not found");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Task deleted", null));
+});
