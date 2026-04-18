@@ -6,7 +6,7 @@ import {
   updateProject,
   deleteProject,
   getProjectMembers,
-  addProjectMember,
+  addMemberToProject,
   updateProjectMemberRole,
   deleteProjectMember,
 } from "../controllers/project.controller.js";
@@ -31,7 +31,7 @@ projectRouter
 
 projectRouter
   .route("/:projectId/members")
-  .post(verifyJwt, addProjectMember);
+  .post(verifyJwt, addMemberToProject);
 
 projectRouter
   .route("/:projectId/members/:userId")

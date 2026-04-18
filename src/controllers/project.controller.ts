@@ -3,7 +3,8 @@ import { ApiError, ApiResponse } from "../utils/api-responses.js";
 import { Project } from "../models/project.model.js";
 import { isValidObjectId } from "mongoose";
 import { ProjectMember } from "../models/project-member.model.js";
-import { avilableRoles } from "../utils/constants.js";
+import { avilableRoles, UserRoles } from "../utils/constants.js";
+import { User } from "../models/user.model.js";
 
 // Getting all projects
 export const getProjects = asyncHandler(async (req, res) => {
@@ -68,6 +69,32 @@ export const getProjects = asyncHandler(async (req, res) => {
   return res.status(200).json(
     new ApiResponse(200, "Projects fetched successfully", {
       projects,
+    }),
+  );
+});
+
+export const createProject = asyncHandler(async (req, res) => {
+  const { name, description } = req.body;
+
+  const user = req.user!;
+
+  const newProject = await Project.create({
+    name,
+    description,
+    createdBy: user._id,
+  });
+
+  if (!newProject) throw new ApiError(400, "Something went wrong");
+
+  await ProjectMember.create({
+    project: newProject._id,
+    user: user._id,
+    role: UserRoles.ADMIN,
+  });
+
+  return res.status(201).json(
+    new ApiResponse(201, "Project created", {
+      project: newProject,
     }),
   );
 });
@@ -221,15 +248,15 @@ export const updateProjectMemberRole = asyncHandler(
     if (!avilableRoles.includes(role))
       throw new ApiError(400, "Invalid role");
 
-    const updatedProjectMember = await ProjectMember.findOneAndUpdate(
+    const projectmember = await ProjectMember.findOneAndUpdate(
       {
         project: projectId,
         user: userId,
       },
       {
-        project: projectId,
-        user: userId,
-        role,
+        $set: {
+          role,
+        },
       },
       {
         returnDocument: "after",
@@ -237,12 +264,12 @@ export const updateProjectMemberRole = asyncHandler(
       },
     );
 
-    if (!updatedProjectMember)
+    if (!projectmember)
       throw new ApiError(400, "Project member not found");
 
     return res.status(200).json(
       new ApiResponse(200, "Project member updated", {
-        projectMember: updatedProjectMember,
+        projectmember,
       }),
     );
   },
@@ -269,6 +296,44 @@ export const deleteProjectMember = asyncHandler(async (req, res) => {
   return res.status(200).json(
     new ApiResponse(200, "Project member deleted", {
       deletedProjectMember: deletedProjectMember,
+    }),
+  );
+});
+
+export const addMemberToProject = asyncHandler(async (req, res) => {
+  const projectId = req.params.projectId as string;
+  const userId = req.params.userId as string;
+
+  const { role } = req.body;
+
+  if (!isValidObjectId(userId))
+    throw new ApiError(400, "Invalid user ID");
+
+  if (!isValidObjectId(projectId))
+    throw new ApiError(400, "Invalid project ID");
+
+  const projectMember = await ProjectMember.findOneAndUpdate(
+    {
+      project: projectId,
+      user: userId,
+    },
+
+    {
+      project: projectId,
+      user: userId,
+      role,
+    },
+    {
+      returnDocument: "after",
+      upsert: true,
+    },
+  );
+
+  if (!projectMember) throw new ApiError(400, "Something went wrong");
+
+  return res.status(200).json(
+    new ApiResponse(200, "Project member added", {
+      projectMember,
     }),
   );
 });
