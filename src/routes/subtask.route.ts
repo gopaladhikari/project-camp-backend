@@ -5,6 +5,8 @@ import {
   deleteSubtaskById,
   updateSubtaskById,
 } from "../controllers/subtask.controller.js";
+import { rbacMiddleware } from "../middlewares/rbac.middleware.js";
+import { UserRoles } from "../utils/constants.js";
 
 const subTaskRouter = Router();
 
@@ -12,7 +14,10 @@ subTaskRouter.use(verifyJwt);
 
 subTaskRouter
   .route("/:projectId/t/:taskId/subtasks")
-  .post(createSubtask);
+  .post(
+    rbacMiddleware([UserRoles.ADMIN, UserRoles.PROJECT_ADMIN]),
+    createSubtask,
+  );
 
 subTaskRouter
   .route("/:projectId/st/:subTaskId")
@@ -20,6 +25,9 @@ subTaskRouter
 
 subTaskRouter
   .route("/:projectId/st/:subTaskId")
-  .delete(deleteSubtaskById);
+  .delete(
+    rbacMiddleware([UserRoles.ADMIN, UserRoles.PROJECT_ADMIN]),
+    deleteSubtaskById,
+  );
 
 export { subTaskRouter };
