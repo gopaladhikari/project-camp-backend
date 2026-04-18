@@ -1,11 +1,18 @@
 import { body, param } from "express-validator";
 
-export const createTaskValidator = () => [
+export const createSubtaskValidator = () => [
   param("projectId")
     .notEmpty()
     .withMessage("Project id is required")
     .isMongoId()
     .withMessage("Invalid project id")
+    .trim(),
+
+  param("taskId")
+    .notEmpty()
+    .withMessage("Task id is required")
+    .isMongoId()
+    .withMessage("Invalid task id")
     .trim(),
 
   body("title")
@@ -28,16 +35,9 @@ export const createTaskValidator = () => [
     .isBoolean()
     .withMessage("Invalid status")
     .trim(),
-
-  body("assignedTo")
-    .notEmpty()
-    .withMessage("Assigned to is required")
-    .isMongoId()
-    .withMessage("Invalid assigned to")
-    .trim(),
 ];
 
-export const updateTaskValidator = () => [
+export const updateSubtaskValidator = () => [
   param("projectId")
     .notEmpty()
     .withMessage("Project id is required")
@@ -45,11 +45,11 @@ export const updateTaskValidator = () => [
     .withMessage("Invalid project id")
     .trim(),
 
-  param("taskId")
+  param("subTaskId")
     .notEmpty()
-    .withMessage("Task id is required")
+    .withMessage("Subtask id is required")
     .isMongoId()
-    .withMessage("Invalid task id")
+    .withMessage("Invalid subtask id")
     .trim(),
 
   body("title")
@@ -69,21 +69,5 @@ export const updateTaskValidator = () => [
     .withMessage("Status is required")
     .isBoolean()
     .withMessage("Invalid status")
-    .trim(),
-];
-
-export const taskIdValidator = () => [
-  param("projectId")
-    .notEmpty()
-    .withMessage("Project id is required")
-    .isMongoId()
-    .withMessage("Invalid project id")
-    .trim(),
-
-  param("taskId")
-    .notEmpty()
-    .withMessage("Task id is required")
-    .isMongoId()
-    .withMessage("Invalid task id")
     .trim(),
 ];

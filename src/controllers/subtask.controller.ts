@@ -68,6 +68,7 @@ export const updateSubtaskById = asyncHandler(async (req, res) => {
     },
   );
   if (!subtask) throw new ApiError(400, "Subtask update failed");
+
   return res.status(200).json(
     new ApiResponse(200, "Subtask updated", {
       subtask,
