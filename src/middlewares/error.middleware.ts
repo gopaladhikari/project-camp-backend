@@ -13,5 +13,5 @@ export const errorHandler = (
 
   return res
     .status(500)
-    .json(new ApiError(500, "Internal server error", err.message));
+    .json(new ApiError(500, "Internal server error", err));
 };
