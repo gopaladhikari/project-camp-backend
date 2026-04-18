@@ -1,48 +1,90 @@
-import { User } from "../models/user.model.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { ApiError, ApiResponse } from "../utils/api-responses.js";
 import { Project } from "../models/project.model.js";
-import mongoose, { isValidObjectId } from "mongoose";
+import { isValidObjectId } from "mongoose";
 import { ProjectMember } from "../models/project-member.model.js";
-import { UserRoles } from "../utils/constants.js";
 
 // Getting all projects
 export const getProjects = asyncHandler(async (req, res) => {
   const user = req.user!;
 
-  const projects = await Project.find({ createdBy: user._id });
+  const projects = await ProjectMember.aggregate([
+    {
+      $match: {
+        user: user._id,
+      },
+    },
+    {
+      $lookup: {
+        from: "projects",
+        localField: "project",
+        foreignField: "_id",
+        as: "project",
+
+        pipeline: [
+          {
+            $lookup: {
+              from: "projectmembers",
+              localField: "_id",
+              foreignField: "projects",
+              as: "projectmembers",
+            },
+          },
+          {
+            $addFields: {
+              members: {
+                $size: "$projectmembers",
+              },
+            },
+          },
+        ],
+      },
+    },
+
+    {
+      $unwind: "$project",
+    },
+
+    {
+      $project: {
+        project: {
+          _id: 1,
+          name: 1,
+          description: 1,
+          project: 1,
+          createdBy: 1,
+          members: 1,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+        role: 1,
+      },
+    },
+  ]);
 
   if (!projects) throw new ApiError(400, "No projects found");
 
+  return res.status(200).json(
+    new ApiResponse(200, "Projects fetched successfully", {
+      projects,
+    }),
+  );
+});
+
+export const getProjectById = asyncHandler(async (req, res) => {
+  const projectId = req.params.projectId;
+
+  if (!isValidObjectId(projectId))
+    throw new ApiError(400, "Invalid project ID");
+
+  const project = await Project.findById(projectId);
+
+  if (!project) throw new ApiError(400, "Project not found");
+
   return res
     .status(200)
-    .json(new ApiResponse(200, "Projects found", projects));
+    .json(new ApiResponse(200, "Project found", { project }));
 });
-
-// Creating a project
-export const createProject = asyncHandler(async (req, res) => {
-  const user = req.user!;
-
-  const { name, description } = req.body;
-
-  const project = await Project.create({
-    name,
-    description,
-    createdBy: new mongoose.Types.ObjectId(user._id),
-  });
-
-  await ProjectMember.create({
-    project: new mongoose.Types.ObjectId(project._id),
-    user: new mongoose.Types.ObjectId(user._id),
-    role: UserRoles.ADMIN,
-  });
-
-  return res
-    .status(201)
-    .json(new ApiResponse(201, "Project created", { project }));
-});
-
-export const getProjectById = asyncHandler(async (req, res) => {});
 
 export const updateProject = asyncHandler(async (req, res) => {
   const user = req.user!;
