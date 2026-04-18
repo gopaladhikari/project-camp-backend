@@ -4,7 +4,6 @@ import { Project } from "../models/project.model.js";
 import { isValidObjectId } from "mongoose";
 import { ProjectMember } from "../models/project-member.model.js";
 import { avilableRoles, UserRoles } from "../utils/constants.js";
-import { User } from "../models/user.model.js";
 
 // Getting all projects
 export const getProjects = asyncHandler(async (req, res) => {

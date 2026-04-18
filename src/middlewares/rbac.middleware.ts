@@ -8,7 +8,8 @@ export const rbacMiddleware = (roles: typeof avilableRoles) =>
   asyncHandler(async (req, _res, next) => {
     const projectId = req.params.projectId as string;
 
-    if (!isValidObjectId) throw new Error("Invalid ObjectId");
+    if (!isValidObjectId(projectId))
+      throw new Error("Invalid ObjectId");
 
     const project = await ProjectMember.findOne({
       project: projectId,
