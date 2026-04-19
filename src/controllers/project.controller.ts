@@ -111,6 +111,8 @@ export const createProject = asyncHandler(async (req, res) => {
       },
     );
 
+    await session.commitTransaction();
+
     return res.status(201).json(
       new ApiResponse(201, "Project created", {
         project: projectDoc,
