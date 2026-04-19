@@ -9,7 +9,7 @@ export const rbacMiddleware = (roles: typeof avilableRoles) =>
     const projectId = req.params.projectId as string;
 
     if (!isValidObjectId(projectId))
-      throw new Error("Invalid ObjectId");
+      throw new ApiError(400, "Invalid project id", null);
 
     const project = await ProjectMember.findOne({
       project: projectId,
@@ -19,8 +19,6 @@ export const rbacMiddleware = (roles: typeof avilableRoles) =>
     if (!project) throw new ApiError(400, "Project not found", null);
 
     const givenRole = project.role;
-
-    req.user!.role = givenRole;
 
     if (!roles.includes(givenRole))
       throw new ApiError(403, "Forbidden", null);

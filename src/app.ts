@@ -31,8 +31,8 @@ app.use("/api/v1/healthcheck", healthCheckRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/projects", projectRouter);
 app.use("/api/v1/tasks", taskRouter);
-app.use("/api/v1/tasks", subTaskRouter);
-app.use("/api/v1/note", noteRouter);
+app.use("/api/v1/subtasks", subTaskRouter);
+app.use("/api/v1/notes", noteRouter);
 
 // Customm Error Handler
 

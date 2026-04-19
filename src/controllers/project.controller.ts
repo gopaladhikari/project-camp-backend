@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/async-handler.js";
 import { ApiError, ApiResponse } from "../utils/api-responses.js";
 import { Project } from "../models/project.model.js";
-import { isValidObjectId } from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 import { ProjectMember } from "../models/project-member.model.js";
 import { avilableRoles, UserRoles } from "../utils/constants.js";
 
@@ -63,7 +63,8 @@ export const getProjects = asyncHandler(async (req, res) => {
     },
   ]);
 
-  if (!projects) throw new ApiError(400, "No projects found");
+  if (projects.length === 0)
+    throw new ApiError(400, "No projects found");
 
   return res.status(200).json(
     new ApiResponse(200, "Projects fetched successfully", {
@@ -77,25 +78,53 @@ export const createProject = asyncHandler(async (req, res) => {
 
   const user = req.user!;
 
-  const newProject = await Project.create({
-    name,
-    description,
-    createdBy: user._id,
-  });
+  const session = await mongoose.startSession();
 
-  if (!newProject) throw new ApiError(400, "Something went wrong");
+  try {
+    const createdProject = await Project.create(
+      [
+        {
+          name,
+          description,
+          createdBy: user._id,
+        },
+      ],
+      {
+        session,
+      },
+    );
 
-  await ProjectMember.create({
-    project: newProject._id,
-    user: user._id,
-    role: UserRoles.ADMIN,
-  });
+    const projectDoc = createdProject[0];
 
-  return res.status(201).json(
-    new ApiResponse(201, "Project created", {
-      project: newProject,
-    }),
-  );
+    if (!projectDoc) throw new ApiError(400, "Something went wrong");
+
+    await ProjectMember.create(
+      [
+        {
+          project: projectDoc._id,
+          user: user._id,
+          role: UserRoles.ADMIN,
+        },
+      ],
+      {
+        session,
+      },
+    );
+
+    return res.status(201).json(
+      new ApiResponse(201, "Project created", {
+        project: projectDoc,
+      }),
+    );
+  } catch (error) {
+    await session.abortTransaction();
+
+    if (error instanceof ApiError) throw error;
+
+    throw new ApiError(500, (error as Error).message);
+  } finally {
+    await session.endSession();
+  }
 });
 
 export const getProjectById = asyncHandler(async (req, res) => {
@@ -133,10 +162,16 @@ export const updateProject = asyncHandler(async (req, res) => {
       "You are not authorized to update this project",
     );
 
-  const updatedProject = await project.updateOne({
-    name,
-    description,
-  });
+  const updatedProject = await Project.findByIdAndUpdate(
+    projectId,
+    {
+      name,
+      description,
+    },
+    {
+      new: true,
+    },
+  );
 
   return res.status(200).json(
     new ApiResponse(200, "Project updated", {

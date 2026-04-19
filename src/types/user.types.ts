@@ -1,5 +1,4 @@
 import type { Document } from "mongoose";
-import type { UserRoles } from "../utils/constants.js";
 
 export type IUser = {
   isPasswordValid(password: string): Promise<boolean>;
@@ -22,5 +21,4 @@ export type IUser = {
   fogotPasswordExpires: Date | undefined;
   emailVerificationToken: string | undefined;
   emailVerificationExpires: Date | undefined;
-  role: UserRoles;
 } & Document;

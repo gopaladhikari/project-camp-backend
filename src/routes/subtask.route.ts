@@ -33,10 +33,7 @@ subTaskRouter
     updateSubtaskValidator(),
     validateRequest,
     updateSubtaskById,
-  );
-
-subTaskRouter
-  .route("/:projectId/st/:subTaskId")
+  )
   .delete(
     rbacMiddleware([UserRoles.ADMIN, UserRoles.PROJECT_ADMIN]),
     deleteSubtaskById,
