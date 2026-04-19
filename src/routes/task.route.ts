@@ -15,6 +15,7 @@ import {
   taskIdValidator,
   updateTaskValidator,
 } from "../validators/task.validator.js";
+import { upload } from "../middlewares/multer.middleware.js";
 
 const taskRouter = Router();
 
@@ -27,6 +28,7 @@ taskRouter
     rbacMiddleware([UserRoles.ADMIN, UserRoles.PROJECT_ADMIN]),
     createTaskValidator(),
     validateRequest,
+    upload.array("attachments", 5),
     createTask,
   );
 

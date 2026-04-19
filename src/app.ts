@@ -25,12 +25,14 @@ import { errorHandler } from "./middlewares/error.middleware.js";
 import { projectRouter } from "./routes/project.route.js";
 import { taskRouter } from "./routes/task.route.js";
 import { subTaskRouter } from "./routes/subtask.route.js";
+import { noteRouter } from "./routes/note.route.js";
 
 app.use("/api/v1/healthcheck", healthCheckRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/projects", projectRouter);
 app.use("/api/v1/tasks", taskRouter);
 app.use("/api/v1/tasks", subTaskRouter);
+app.use("/api/v1/note", noteRouter);
 
 // Customm Error Handler
 
